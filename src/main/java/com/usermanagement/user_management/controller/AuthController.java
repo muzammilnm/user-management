@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.usermanagement.user_management.dto.LoginRequestDto;
+import com.usermanagement.user_management.dto.LoginResponseDto;
 import com.usermanagement.user_management.dto.RegisterRequestDto;
 import com.usermanagement.user_management.dto.RegisterResponseDto;
 import com.usermanagement.user_management.entity.Users;
@@ -25,6 +27,13 @@ public class AuthController {
     public HttpEntity<RegisterResponseDto> register(@RequestBody RegisterRequestDto request){
         Users user = authService.register(request);
         RegisterResponseDto response = RegisterResponseDto.builder().email(user.getEmail()).build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public HttpEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request){
+        LoginResponseDto response = authService.login(request);
+
         return ResponseEntity.ok(response);
     }
 }
