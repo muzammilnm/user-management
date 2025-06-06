@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.usermanagement.user_management.dto.AuthResponseDto;
 import com.usermanagement.user_management.dto.LoginRequestDto;
 import com.usermanagement.user_management.dto.LoginResponseDto;
 import com.usermanagement.user_management.dto.RegisterRequestDto;
@@ -34,6 +36,12 @@ public class AuthController {
     public HttpEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request){
         LoginResponseDto response = authService.login(request);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public HttpEntity<AuthResponseDto> refresh(@RequestParam String email, @RequestParam String refreshToken){
+        var response = authService.refresh(email, refreshToken);
         return ResponseEntity.ok(response);
     }
 }

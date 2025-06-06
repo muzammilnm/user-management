@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.usermanagement.user_management.dto.AuthResponseDto;
 import com.usermanagement.user_management.dto.LoginRequestDto;
 import com.usermanagement.user_management.dto.LoginResponseDto;
 import com.usermanagement.user_management.dto.RegisterRequestDto;
@@ -41,15 +42,29 @@ public class AuthService {
     public LoginResponseDto login(LoginRequestDto request){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         var aaccessToken = jwtService.generateToken(request.getEmail());
         var refreshToken = jwtService.generateToken(request.getEmail());
 
-        refreshTokenService.storeToken(refreshToken, refreshToken);
+        refreshTokenService.storeToken(user.getEmail(), refreshToken);
 
         return LoginResponseDto.builder()
             .accessToken(aaccessToken)
+            .refreshToken(refreshToken)
+            .build();
+    }
+
+    public AuthResponseDto refresh(String email, String refreshToken){
+        var storedToken = refreshTokenService.getToken(email);
+
+        if (!refreshToken.equals(storedToken) || !jwtService.isTokenValid(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        var newAccessToken = jwtService.generateToken(email);
+        return AuthResponseDto.builder()
+            .accessToken(newAccessToken)
             .refreshToken(refreshToken)
             .build();
     }
